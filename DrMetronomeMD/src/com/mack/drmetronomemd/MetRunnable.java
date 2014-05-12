@@ -1,65 +1,33 @@
 package com.mack.drmetronomemd;
 
+import android.app.Activity;
 import android.content.Context;
+import android.os.Handler;
 
-public class MetRunnable implements Runnable {
-	private Context context;
-	private Object mPauseLock;
-	private boolean mPaused;
-	private boolean mFinished;
+public class MetRunnable extends Activity {
+	Context context;
+	private Handler handler = new Handler();
+	Metronome met;
 	
-	public MetRunnable(Context context) {
-		mPauseLock = new Object();
-		mPaused = false;
-		mFinished = false;
+	Runnable runnable = new Runnable() {
+		public void run() {
+			met.play();
+			handler.postDelayed(this, met.get_interval());
+		}
+	};
+	
+	public MetRunnable(Context context, Metronome met) {
 		this.context = context;
+		this.met = met;
 	}
-		
-	@Override
-	public void run() {
-		while (!mFinished) {
-			Metronome met = new Metronome(this.context);
-	    	met.initSounds();
-	    	
-			double t = 60.0 / met.get_bpm() - 0.1;
-	    	long time = (long) t * 1000;
-	    	
-	    	while (!mPaused) {
-				met.play();
-				/*if (met.whole.isSubOn()) {
-		    		met.playWhole();
-		    	}
-		    	*/
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-	    	
-	    	synchronized (mPauseLock) {
-	    		while (mPaused) {
-	    			try {
-	    				mPauseLock.wait();
-	    			}
-	    			catch (InterruptedException e){
-	    			}
-	    		}
-	    	}
-		}		
-	}
+	
 	// Call to pause
 	public void onPause() {
-		synchronized (mPauseLock) {
-			mPaused = true;
-		}
+		handler.removeCallbacks(runnable);
 	}
 	// Call to resume
 	public void onResume() {
-		synchronized (mPauseLock) {
-			mPaused = false;
-			mPauseLock.notifyAll();
-		}
+		handler.postDelayed(runnable, met.get_interval());
+		super.onResume();
 	}
 }

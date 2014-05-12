@@ -3,6 +3,7 @@ package com.mack.drmetronomemd;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,8 +13,16 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class MainActivity extends ActionBarActivity {
-	MetRunnable metRun;
-	Thread metThread;
+	Metronome met;
+	
+	// Handler and Runnable for main metronome function
+	Handler handler = new Handler();
+	Runnable runnable = new Runnable() {
+		public void run() {
+			met.play();
+			handler.postDelayed(this, met.get_interval());
+		}
+	};
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +35,9 @@ public class MainActivity extends ActionBarActivity {
                     .commit();
         }
         
-        metRun = new MetRunnable(this);
+        // Initialize metronome and sounds
+        met = new Metronome(this);
+        met.initSounds();
     }
     
     @Override
@@ -54,20 +65,10 @@ public class MainActivity extends ActionBarActivity {
 	public void toggleMetronome(View view) throws InterruptedException {
     	boolean on = ((ToggleButton) view).isChecked();
     	if(on) {
-    		Toast.makeText(this, "ON", Toast.LENGTH_SHORT).show();
-    		// If metronome thread not already running, create thread
-    		// Else, resume thread already running
-    		if (metThread == null) {
-    			metThread = new Thread(metRun);
-    			metThread.start();
-    		}
-    		else { 
-    			metRun.onResume();
-    		}
+    		runnable.run();
     	}
     	else {
-    		Toast.makeText(this, "OFF", Toast.LENGTH_SHORT).show();
-    		metRun.onPause(); // Pause runnable when toggle is off
+    		handler.removeCallbacks(runnable);
     	}
     }
 
@@ -86,5 +87,21 @@ public class MainActivity extends ActionBarActivity {
             return rootView;
         }
     }
-
+    
+    // Stop, Resume, Destroy sound runnable
+    @Override
+ 	public void onPause() {
+ 		handler.removeCallbacks(runnable);
+ 		super.onPause();
+ 	}
+ 	@Override
+    public void onResume() {
+ 		handler.postDelayed(runnable, met.get_interval());
+ 		super.onResume();
+ 	}
+ 	@Override
+ 	public void onDestroy() {
+ 		handler.removeCallbacks(runnable);
+ 		super.onDestroy();
+ 	}
 }

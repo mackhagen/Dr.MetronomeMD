@@ -7,15 +7,18 @@ import android.content.Context;
 import java.util.*;
 
 public class Metronome {
+	// Variables
 	private int bpm; // Beats per minute
 	private int tSig; // Time signature, beats per measure
-	private int mainVolume;
+	private long interval; // Interval between sounds in ms
+	private double mainVolume = 1.0; // Double between 0.0 and 1.0
 	private final Context context;
 	
-	public Subdivision whole; // Whole note subdivision
-	public Subdivision eighth; // Eighth note subdivision
-	public Subdivision sixteenth; // Sixteenth note subdivision
-	public Subdivision triplet; // Triplet subdivision
+	// Subdivision Objects
+	public Subdivision whole;
+	public Subdivision eighth;
+	public Subdivision sixteenth;
+	public Subdivision triplet;
 	
 	// Sounds
 	public static final int SOUND_BEEP = 1;
@@ -24,6 +27,7 @@ public class Metronome {
 	public static final int SOUND_SIXTEENTH = 4;
 	public static final int SOUND_TRIPLET = 5;
 	
+	// SoundPool
 	private SoundPool soundPool;
 	private HashMap<Integer, Integer> soundPoolMap;
 	
@@ -75,33 +79,10 @@ public class Metronome {
 		soundPool.play(soundPoolMap.get(sound), volume, volume, 1, 0, 1f);
 	}
 	
-	/*public void startMet () {
-		sThread = new Thread (new Runnable() { 
-			Metronome met = new Metronome(context);
-			double t = 60.0 / met.get_bpm() - 0.1;
-	    	long time = (long) t * 1000;
-	    	public void run() {
-	    		met.initSounds();
-		    	while (true) {
-					met.play();
-					try {
-						Thread.sleep(time);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-	    	}
-		});
-		sThread.start();
-	}
-	
-	public void stopMet() { 
-	}
-	*/
-	
 	// Play methods
 	public void play() {
+		double t = (60.0 / ((double) bpm)) - 0.1;
+    	interval = (long) (t * 1000);
 		playSound(SOUND_BEEP, mainVolume);
 	}
 	
@@ -141,5 +122,17 @@ public class Metronome {
 		else {
 			tSig = t;
 		}
+	}
+	
+	public long get_interval() {
+		return interval;
+	}
+	
+	public double get_vol() {
+		return mainVolume;
+	}
+	
+	public void set_vol(double vol) {
+		mainVolume = vol;
 	}
 }
