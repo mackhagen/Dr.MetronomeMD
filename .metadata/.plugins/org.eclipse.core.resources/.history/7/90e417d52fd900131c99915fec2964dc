@@ -1,0 +1,148 @@
+package com.mack.drmetronomemd;
+
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.content.Context;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+public class Metronome {
+	private int bpm;
+	private int t_sig;
+	private boolean whole;
+	private boolean eighth;
+	private boolean sixteenth;
+	private boolean triplet;
+	private boolean stop;
+	private Context context;
+	private Thread sThread;
+	
+	public static final int SOUND_BEEP = 1;
+	private SoundPool soundPool;
+	private HashMap<Integer, Integer> soundPoolMap;
+	
+	// Default constructor
+	public Metronome(Context context) {
+		bpm = 100;
+		t_sig = 4;
+		whole = true;
+		eighth = false;
+		sixteenth = false;
+		triplet = false;
+		this.context = context;
+	}
+	// Constructor with bpm input
+	public Metronome(Context context, int b) {
+		bpm = b;
+		t_sig = 4;
+		whole = true;
+		eighth = false;
+		sixteenth = false;
+		triplet = false;
+		this.context = context;
+	}
+	// Constructor with bpm and time signature input
+	public Metronome(Context context, int b, int t) {
+		bpm = b;
+		t_sig = t;
+		whole = true;
+		eighth = false;
+		sixteenth = false;
+		triplet = false;
+		this.context = context;
+	}
+	
+	public void initSounds() {
+		soundPool = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);
+		soundPoolMap = new HashMap<Integer, Integer>();
+		soundPoolMap.put(SOUND_BEEP, soundPool.load(context, R.raw.beep, 1));
+	}
+	
+	public void playSound(int sound) {		
+		soundPool.play(soundPoolMap.get(sound), 1, 1, 1, 0, 1f);
+	}
+	
+	public void startMet () {
+		sThread = new Thread (new Runnable() {
+			Metronome met = new Metronome(MainActivity.this);
+	    	met.initSounds();
+    		double t = 60.0 / bpm - 0.1;
+        	long time = (long) t * 1000;
+    		public void run() {
+	        	while (true) {
+					playSound(SOUND_BEEP);
+					try {
+						Thread.sleep(time);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+    		}
+    	});
+	}
+	
+	public void stopMet() { 
+    	if (sThread != null) {
+    		sThread = null;
+    	}
+	}
+	
+	public void play() {
+		playSound(SOUND_BEEP);
+	}
+	
+	public void set_bpm(int b) {
+		bpm = b;
+	}
+	
+	public void set_tsig(int t){
+		if (t < 0 || t > 12) {
+			t_sig = 4;
+		}
+		else {
+			t_sig = t;
+		}
+	}
+	
+	public void toggle_whole() {
+		if (whole == false) {
+			whole = true;
+		}
+		else {
+			whole = false;
+		}
+	}
+	
+	public void toggle_eighth() {
+		if (eighth == false) {
+			eighth = true;
+		}
+		else {
+			eighth = false;
+		}
+	}
+	
+	public void toggle_sixteenth() {
+		if (sixteenth == false) {
+			sixteenth = true;
+		}
+		else {
+			sixteenth = false;
+		}
+	}
+	
+	public void toggle_triplet() {
+		if (triplet == false) {
+			triplet = true;
+		}
+		else {
+			triplet = false;
+		}
+	}
+	
+	public int get_bpm() {
+		return bpm;
+	}
+}

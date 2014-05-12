@@ -1,0 +1,6 @@
+com.android.ide.eclipse.adt.emuOptions=-dns-server 8.8.8.8,8.8.4.4
+com.android.ide.eclipse.adt.fixLegacyEditors=1
+com.android.ide.eclipse.adt.sdk=C\:\\Program Files (x86)\\ADT-Bundle\\sdk
+com.android.ide.eclipse.adt.xmlEditor=true
+design.palette.flyout.width=150
+eclipse.preferences.version=1

@@ -1,0 +1,50 @@
+package com.mack.drmetronomemd;
+
+import android.content.Context;
+
+public class MetRunnable implements Runnable {
+	private Context context;
+	private Object mPauseLock;
+	private boolean mPaused;
+	private boolean mFinished;
+	
+	public MetRunnable() {
+		mPauseLock = new Object();
+		mPaused = false;
+		mFinished = false;
+	}
+	
+	public void setData(Context context) {
+		this.context = context;
+	}
+		
+	@Override
+	public void run() {
+		while (!mFinished) {
+			Metronome met = new Metronome(this.context);
+	    	met.initSounds();
+			double t = 60.0 / met.get_bpm() - 0.1;
+	    	long time = (long) t * 1000;
+	    	while (!mPaused) {
+				met.play();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+	    	
+	    	synchronized (mPauseLock) {
+	    		while (mPaused) {
+	    			try {
+	    				mPauseLock.wait();
+	    			}
+	    			catch (InterruptedException e){
+	    			}
+	    		}
+	    	}
+		}		
+	}
+
+}

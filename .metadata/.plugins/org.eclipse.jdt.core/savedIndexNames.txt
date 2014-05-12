@@ -1,0 +1,5 @@
+INDEX VERSION 1.126+C:\Users\Mack\Dropbox\Programming\Android\Dr.MetronomeMD\.metadata\.plugins\org.eclipse.jdt.core
+1284074322.index
+1994590765.index
+4087669718.index
+885548984.index

@@ -1,0 +1,71 @@
+package com.mack.drmetronomemd;
+
+public class Subdivision {
+	private boolean on; // Boolean for subdivision status
+	private double volume; // Volume of subdivision
+	private int division; // Division of beat
+	
+	// Default Constructor
+	public Subdivision() {
+		on = true;
+		volume = 1.0;
+		division = 4;
+	}
+	// Pass in division
+	public Subdivision(int div) {
+		division = div;
+		on = true;
+		volume = 1.0;
+	}
+	// Pass in status
+	public Subdivision(int div, boolean on) {
+		division = div;
+		this.on = on;
+		volume = 1.0;
+	}
+	// Pass in volume
+	public Subdivision(int div, boolean on, double vol) {
+		division = div;
+		this.on = on;
+		volume = vol;
+	}
+	
+	// Return true if subdivision is on
+	public boolean isSubOn() {
+		if (on)
+			return true;
+		else
+			return false;
+	}
+
+	// Set subdivision on or off
+	public void setSub(boolean turn) {
+		if (turn)
+			this.on = true;
+		else
+			this.on = false;
+	}
+	
+	// Get volume of subdivision
+	public double getSubVol() {
+		return volume;
+	}
+	
+	// Set volume of subdivision, must be 0 < v < 1;
+	public void setSubVol(double vol) {
+		if (vol > 1.0)
+			volume = 1.0;
+		else if (vol < 0.0)
+			volume = 0.0;
+		else
+			volume = vol;
+	}
+	
+	public int getDiv() {
+		return division;
+	}
+	
+	public void setDiv(int div) {
+		division = div;
+	}
+}

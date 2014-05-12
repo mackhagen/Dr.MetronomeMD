@@ -1,0 +1,143 @@
+package com.mack.drmetronomemd;
+
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.content.Context;
+
+import java.util.*;
+
+public class Metronome {
+	private int bpm; // Beats per minute
+	private int tSig; // Time signature, beats per measure
+	private final Context context;
+	
+	public Subdivision whole; // Whole note subdivision
+	public Subdivision eighth; // Eighth note subdivision
+	public Subdivision sixteenth; // Sixteenth note subdivision
+	public Subdivision triplet; // Triplet subdivision
+	
+	// Sounds
+	public static final int SOUND_BEEP = 1;
+	public static final int SOUND_WHOLE = 2;
+	public static final int SOUND_EIGHTH = 3;
+	public static final int SOUND_SIXTEENTH = 4;
+	public static final int SOUND_TRIPLET = 5;
+	
+	private SoundPool soundPool;
+	private HashMap<Integer, Integer> soundPoolMap;
+	
+	// Default constructor
+	public Metronome(final Context context) {
+		bpm = 100;
+		tSig = 4;
+		whole = new Subdivision(1);
+		eighth = new Subdivision(2, false);
+		sixteenth = new Subdivision(4, false);
+		triplet = new Subdivision(3, false);
+		this.context = context;
+	}
+	// Constructor with bpm input
+	public Metronome(final Context context, int b) {
+		bpm = b;
+		tSig = 4;
+		whole = new Subdivision(1);
+		eighth = new Subdivision(2, false);
+		sixteenth = new Subdivision(4, false);
+		triplet = new Subdivision(3, false);
+		this.context = context;
+	}
+	// Constructor with bpm and time signature input
+	public Metronome(final Context context, int b, int t) {
+		bpm = b;
+		tSig = t;
+		whole = new Subdivision(1);
+		eighth = new Subdivision(2, false);
+		sixteenth = new Subdivision(4, false);
+		triplet = new Subdivision(3, false);
+		this.context = context;
+	}
+	
+	public void initSounds() {
+		soundPool = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);
+		soundPoolMap = new HashMap<Integer, Integer>();
+		soundPoolMap.put(SOUND_BEEP, soundPool.load(context, R.raw.beep, 1));
+	}
+	
+	public void playSound(int sound, double vol) {
+		float volume;
+		if (vol > 1.0)
+			volume = (float) 1.0;
+		else if (vol < 0.0)
+			volume = (float) 0.0;
+		else
+			volume = (float) vol;
+		soundPool.play(soundPoolMap.get(sound), volume, volume, 1, 0, 1f);
+	}
+	
+	/*public void startMet () {
+		sThread = new Thread (new Runnable() { 
+			Metronome met = new Metronome(context);
+			double t = 60.0 / met.get_bpm() - 0.1;
+	    	long time = (long) t * 1000;
+	    	public void run() {
+	    		met.initSounds();
+		    	while (true) {
+					met.play();
+					try {
+						Thread.sleep(time);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+	    	}
+		});
+		sThread.start();
+	}
+	
+	public void stopMet() { 
+	}
+	*/
+	
+	// Play methods
+	public void play() {
+		playSound(SOUND_BEEP);
+	}
+	
+	public void playWhole() {
+		playSound(SOUND_WHOLE);
+	}
+	
+	public void playEighth() {
+		playSound(SOUND_EIGHTH);
+	}
+	
+	public void playSixteenth() {
+		playSound(SOUND_SIXTEENTH);
+	}
+	
+	public void playTriplet() {
+		playSound(SOUND_TRIPLET);
+	}
+	
+	public int get_bpm() {
+		return bpm;
+	}
+	
+	public void set_bpm(int b) {
+		bpm = b;
+	}
+	
+	public int get_tsig() {
+		return tSig;
+	}
+	
+	public void set_tsig(int t){
+		if (t < 0 || t > 12) {
+			tSig = 4;
+		}
+		else {
+			tSig = t;
+		}
+	}
+}
