@@ -9,10 +9,11 @@
     tools:context="com.mack.drmetronomemd.MainActivity$PlaceholderFragment" >
 
     <ToggleButton
-        android:id="@+id/metronomeToggle"
+        android:id="@+id/toggle_metronome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
         android:onClick="toggleMetronome"
         android:text="@string/start" />
 

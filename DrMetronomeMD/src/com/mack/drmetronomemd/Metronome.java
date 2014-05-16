@@ -1,18 +1,25 @@
 package com.mack.drmetronomemd;
 
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.widget.Toast;
+import android.annotation.SuppressLint;
 import android.content.Context;
-
+import android.util.Log;
 import java.util.*;
 
 public class Metronome {
-	// Variables
-	private int bpm; // Beats per minute
-	private int tSig; // Time signature, beats per measure
-	private long interval; // Interval between sounds in ms
-	private double mainVolume = 1.0; // Double between 0.0 and 1.0
 	private final Context context;
+	
+	// Variables
+	private double bpm; // Beats per minute
+	private double new_bpm;
+	private int tSig; // Time signature, beats per measure
+	private int interval; // Interval between sounds in ms
+	private double mainVolume = 1.0; // Double between 0.0 and 1.0
+    
+	private AudioGenerator audioGenerator = new AudioGenerator(8000);
 	
 	// Subdivision Objects
 	public Subdivision whole;
@@ -21,19 +28,23 @@ public class Metronome {
 	public Subdivision triplet;
 	
 	// Sounds
-	public static final int SOUND_BEEP = 1;
-	public static final int SOUND_WHOLE = 2;
-	public static final int SOUND_EIGHTH = 3;
-	public static final int SOUND_SIXTEENTH = 4;
-	public static final int SOUND_TRIPLET = 5;
+	public static final int FREQ_TICK = 600;
+	public static final int FREQ_WHOLE = 900;
+	public static final int FREQ_EIGHTH = 550;
+	public static final int FREQ_SIXTEENTH = 520;
+	public static final int FREQ_TRIPLET = 500;
 	
-	// SoundPool
-	private SoundPool soundPool;
-	private HashMap<Integer, Integer> soundPoolMap;
+	double[] tickS;
+    double[] wholeS;
+    double[] eighthS;
+    double[] sixteenthS;
+    double[] tripletS;
 	
 	// Default constructor
 	public Metronome(final Context context) {
+		audioGenerator.createPlayer();
 		bpm = 100;
+		new_bpm = 100;
 		tSig = 4;
 		whole = new Subdivision(1);
 		eighth = new Subdivision(2, false);
@@ -44,6 +55,7 @@ public class Metronome {
 	// Constructor with bpm input
 	public Metronome(final Context context, int b) {
 		bpm = b;
+		new_bpm = bpm;
 		tSig = 4;
 		whole = new Subdivision(1);
 		eighth = new Subdivision(2, false);
@@ -54,6 +66,7 @@ public class Metronome {
 	// Constructor with bpm and time signature input
 	public Metronome(final Context context, int b, int t) {
 		bpm = b;
+		new_bpm = bpm;
 		tSig = t;
 		whole = new Subdivision(1);
 		eighth = new Subdivision(2, false);
@@ -63,27 +76,35 @@ public class Metronome {
 	}
 	
 	public void initSounds() {
-		soundPool = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);
-		soundPoolMap = new HashMap<Integer, Integer>();
-		soundPoolMap.put(SOUND_BEEP, soundPool.load(context, R.raw.beep, 1));
+		calcInterval();
+		
+		// Sound Sample Arrays
+	    tickS = audioGenerator.getSineWave(interval, 8000, FREQ_TICK);
 	}
 	
-	public void playSound(int sound, double vol) {
-		float volume;
-		if (vol > 1.0)
-			volume = (float) 1.0;
-		else if (vol < 0.0)
-			volume = (float) 0.0;
-		else
-			volume = (float) vol;
-		soundPool.play(soundPoolMap.get(sound), volume, volume, 1, 0, 1f);
-	}
+	public void calcInterval() {
+        interval = (int) ((60.0 / bpm) * 8000.0);
+    }
 	
-	// Play methods
 	public void play() {
-		double t = (60.0 / ((double) bpm)) - 0.1;
-    	interval = (long) (t * 1000);
-		playSound(SOUND_BEEP, mainVolume);
+		calcInterval();
+		if (bpm != new_bpm) {
+			bpm = new_bpm;
+		}
+		calcInterval();
+        double[] sound = new double[(int) interval];
+        int t = 0;
+        for(int i = 0; i < sound.length / 2; i++) {
+	        sound[i] = tickS[t];
+	        t++;
+        }
+        audioGenerator.writeSound(sound);
+}
+
+	/*
+	// Play methods
+	public void playBeep() {
+		playSound(beepID, mainVolume);
 	}
 	
 	public void playWhole() {
@@ -101,31 +122,35 @@ public class Metronome {
 	public void playTriplet() {
 		playSound(SOUND_TRIPLET, triplet.getSubVol());
 	}
+	*/
 	
-	public int get_bpm() {
+	// Getters and Setters
+	public double get_bpm() {
 		return bpm;
 	}
 	
 	public void set_bpm(int b) {
-		bpm = b;
+		if (b < 30)
+			new_bpm = 30;
+		else if (b > 300)
+			new_bpm = 300;
+		else
+			new_bpm = b;
 	}
 	
 	public int get_tsig() {
 		return tSig;
 	}
 	
-	// Set time signature only if 0 < ts < 12
 	public void set_tsig(int t){
-		if (t < 0 || t > 12) {
-			tSig = 4;
-		}
-		else {
+		if (t < 1 || t > 12)
+			tSig = 1;
+		else
 			tSig = t;
-		}
 	}
 	
 	public long get_interval() {
-		return interval;
+		return interval / 8000;
 	}
 	
 	public double get_vol() {

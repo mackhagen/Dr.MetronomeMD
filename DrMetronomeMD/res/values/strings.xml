@@ -6,5 +6,6 @@
     <string name="action_settings">Settings</string>
     <string name="bpm">BPM</string>
     <string name="start">Start/Stop</string>
+    <string name="bpmbutton">Set BPM</string>
 
 </resources>

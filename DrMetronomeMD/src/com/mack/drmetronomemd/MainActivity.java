@@ -9,20 +9,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class MainActivity extends ActionBarActivity {
 	Metronome met;
+	EditText bpm_Input;
+	Button bpm_Button;
 	
 	// Handler and Runnable for main metronome function
 	Handler handler = new Handler();
-	Runnable runnable = new Runnable() {
-		public void run() {
-			met.play();
-			handler.postDelayed(this, met.get_interval());
-		}
-	};
+	Runnable runnable;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +37,17 @@ public class MainActivity extends ActionBarActivity {
         // Initialize metronome and sounds
         met = new Metronome(this);
         met.initSounds();
+        
+        bpm_Input = (EditText) findViewById(R.id.bpmInput);
+    	bpm_Button = (Button) findViewById(R.id.button_bpm);
+    	
+        bpm_Button.setOnClickListener(
+        		new View.OnClickListener() {					
+					@Override
+					public void onClick(View arg0) {
+						met.set_bpm(Integer.valueOf(bpm_Input.getText().toString()));
+					}
+				});
     }
     
     @Override
@@ -62,10 +72,23 @@ public class MainActivity extends ActionBarActivity {
     }
     
     // Toggle metronome on and off
-	public void toggleMetronome(View view) throws InterruptedException {
+	public void toggleMetronome(View view) {
     	boolean on = ((ToggleButton) view).isChecked();
     	if(on) {
-    		runnable.run();
+    		if (runnable == null) {
+    			runnable = new Runnable() {
+    				public void run() {
+    					met.play();
+    					handler.postDelayed(runnable, met.get_interval());
+    				}
+    			};
+    			runnable.run();
+    		}
+    		else {
+    			handler.postDelayed(runnable, met.get_interval());
+    		}
+    		
+    		//met.play();
     	}
     	else {
     		handler.removeCallbacks(runnable);
